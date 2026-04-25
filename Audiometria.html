@@ -1,0 +1,406 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f0f2f7; --surface: #ffffff; --surface2: #f5f7fb;
+    --text: #1a1d2e; --text2: #5a5f7a;
+    --accent: #0ea5e9; --accent2: #6366f1;
+    --border: rgba(0,0,0,0.08);
+    --card-shadow: 0 4px 20px rgba(14,165,233,0.10);
+    --btn-shadow: 0 4px 14px rgba(14,165,233,0.25);
+    --front-bg: #ffffff;
+    --back-bg: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+    --badge-bg: rgba(14,165,233,0.10); --badge-text: #0284c7;
+    --zoom-overlay: rgba(0,0,0,0.88);
+  }
+  .dark {
+    --bg: #0b1120; --surface: #151e30; --surface2: #1e2d42;
+    --text: #e2eaf6; --text2: #7a93b2;
+    --accent: #38bdf8; --accent2: #818cf8;
+    --border: rgba(255,255,255,0.08);
+    --card-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --btn-shadow: 0 4px 18px rgba(56,189,248,0.25);
+    --front-bg: #192234;
+    --back-bg: linear-gradient(135deg, #0369a1 0%, #4338ca 100%);
+    --badge-bg: rgba(56,189,248,0.12); --badge-text: #7dd3fc;
+    --zoom-overlay: rgba(0,0,0,0.94);
+  }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background .4s,color .4s; padding-bottom:2rem; }
+
+  /* ── NAV BAR ── */
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem 0;
+  }
+  .nav-pill {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 14px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    text-decoration: none;
+    transition: all .2s;
+    letter-spacing: .02em;
+  }
+  .nav-pill.active {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: var(--btn-shadow);
+  }
+  .nav-pill:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+  .nav-pill .nav-dot { width:7px; height:7px; border-radius:50%; background:currentColor; opacity:.6; flex-shrink:0; }
+
+  .header { display:flex; flex-direction:column; align-items:center; padding:1.4rem 1.5rem 1.2rem; gap:.3rem; position:relative; }
+  .header h1 { font-family:'Playfair Display',serif; font-size:26px; font-weight:600; color:var(--text); letter-spacing:.02em; text-align:center; }
+  .header .subtitle { font-size:12px; color:var(--text2); letter-spacing:.08em; text-transform:uppercase; font-weight:500; }
+  .header .badge { margin-top:6px; background:var(--badge-bg); color:var(--badge-text); font-size:11px; font-weight:500; padding:4px 12px; border-radius:20px; letter-spacing:.04em; }
+  .toggle-btn { position:absolute; top:1.4rem; right:1.5rem; background:var(--surface); border:1px solid var(--border); border-radius:50px; width:52px; height:28px; cursor:pointer; display:flex; align-items:center; padding:3px; transition:background .3s; }
+  .toggle-thumb { width:22px; height:22px; border-radius:50%; background:var(--accent); transition:transform .3s cubic-bezier(.34,1.56,.64,1); display:flex; align-items:center; justify-content:center; font-size:11px; }
+  body:not(.dark) .toggle-thumb { transform:translateX(0); }
+  body.dark .toggle-thumb { transform:translateX(24px); }
+
+  .tabs { display:flex; gap:8px; max-width:680px; margin:0 auto 1.2rem; padding:0 1.5rem; flex-wrap:wrap; }
+  .tab { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:1.5px solid var(--border); background:var(--surface); color:var(--text2); transition:all .2s; }
+  .tab.active { background:var(--accent); color:#fff; border-color:var(--accent); box-shadow:var(--btn-shadow); }
+  .tab:hover:not(.active) { border-color:var(--accent); color:var(--accent); }
+
+  .progress-bar-wrap { max-width:680px; margin:0 auto .8rem; padding:0 1.5rem; }
+  .progress-label { display:flex; justify-content:space-between; font-size:12px; color:var(--text2); margin-bottom:6px; font-weight:500; }
+  .progress-bar { height:4px; background:var(--border); border-radius:10px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:10px; transition:width .5s cubic-bezier(.4,0,.2,1); }
+
+  .container { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; max-width:680px; margin:0 auto 1.5rem; padding:0 1.5rem; }
+  .card { height:210px; perspective:1200px; cursor:pointer; }
+  .inner { width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform .65s cubic-bezier(.4,.2,.2,1); border-radius:14px; }
+  .card.flip .inner { transform:rotateY(180deg); }
+  .face { position:absolute; width:100%; height:100%; border-radius:14px; padding:16px; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; overflow:hidden; }
+  .front { background:var(--front-bg); border:1px solid var(--border); box-shadow:var(--card-shadow); font-family:'Playfair Display',serif; font-size:12.5px; font-weight:500; color:var(--text); line-height:1.4; gap:8px; }
+  .front::before { content:''; width:28px; height:3px; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:2px; flex-shrink:0; }
+  .front .hint { font-size:10px; color:var(--text2); font-family:'Inter',sans-serif; font-weight:400; letter-spacing:.04em; margin-top:auto; }
+  .back { background:var(--back-bg); transform:rotateY(180deg); font-size:11.5px; line-height:1.5; color:#fff; font-family:'Inter',sans-serif; }
+  .back .num { font-size:22px; font-weight:600; opacity:.2; font-family:'Playfair Display',serif; position:absolute; top:10px; right:14px; }
+  .card:hover .inner { transform:translateY(-3px); }
+  .card.flip:hover .inner { transform:rotateY(180deg) translateY(-3px); }
+
+  .btns-row { display:flex; gap:12px; max-width:680px; margin:0 auto 1.5rem; padding:0 1.5rem; }
+  .btn { flex:1; padding:12px 20px; border-radius:50px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:pointer; border:none; transition:transform .15s,box-shadow .15s; letter-spacing:.03em; }
+  .btn:active { transform:scale(.97); }
+  .btn-primary { background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%); color:#fff; box-shadow:var(--btn-shadow); }
+  .btn-primary:hover { box-shadow:0 6px 20px rgba(14,165,233,.4); transform:translateY(-1px); }
+  .btn-outline { background:var(--surface); color:var(--accent); border:1.5px solid var(--accent); }
+  .btn-outline:hover { background:var(--badge-bg); }
+
+  /* GALERÍA DE REFERENCIAS */
+  .refs-section { max-width:680px; margin:0 auto; padding:0 1.5rem 1.5rem; }
+  .refs-label { font-size:11px; font-weight:600; color:var(--text2); letter-spacing:.08em; text-transform:uppercase; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+  .refs-label::before { content:''; display:inline-block; width:10px; height:10px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); }
+  .refs-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  .ref-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; cursor:zoom-in; transition:transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s; box-shadow:0 2px 12px rgba(14,165,233,.06); }
+  .ref-card:hover { transform:scale(1.03); box-shadow:0 8px 24px rgba(14,165,233,.14); }
+  .ref-card img { width:100%; display:block; }
+  .ref-card .ref-label { padding:8px 12px; font-size:11.5px; font-weight:600; color:var(--text); letter-spacing:.01em; border-top:1px solid var(--border); text-align:center; font-family:'Inter',sans-serif; }
+  .ref-card .ref-badge { display:inline-block; font-size:10px; padding:2px 8px; border-radius:10px; font-weight:500; margin-top:2px; margin-bottom:6px; }
+  .ref-normal .ref-badge { background:rgba(16,185,129,.12); color:#059669; }
+  .ref-conductiva .ref-badge { background:rgba(239,68,68,.12); color:#dc2626; }
+  .ref-neuro .ref-badge { background:rgba(99,102,241,.12); color:#4f46e5; }
+  .ref-mixta .ref-badge { background:rgba(245,158,11,.12); color:#d97706; }
+
+  /* BACK LINK */
+  .page-link-section { max-width:680px; margin:.5rem auto 0; padding:0 1.5rem 2rem; }
+  .page-link-card { display:flex; align-items:center; justify-content:space-between; background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:16px 20px; text-decoration:none; color:var(--text); transition:all .25s; box-shadow:0 2px 12px rgba(79,70,229,.06); }
+  .page-link-card:hover { border-color:#4f46e5; box-shadow:0 8px 28px rgba(79,70,229,.14); transform:translateY(-2px); }
+  .page-link-card .plc-left { display:flex; flex-direction:column; gap:3px; }
+  .page-link-card .plc-eyebrow { font-size:10px; font-weight:600; color:var(--text2); letter-spacing:.08em; text-transform:uppercase; }
+  .page-link-card .plc-title { font-family:'Playfair Display',serif; font-size:15px; font-weight:600; color:#4f46e5; }
+  .page-link-card .plc-sub { font-size:11px; color:var(--text2); }
+  .page-link-card .plc-arrow { font-size:22px; color:#4f46e5; opacity:.7; }
+
+  /* ZOOM MODAL */
+  .zoom-modal { display:none; position:fixed; inset:0; background:var(--zoom-overlay); z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; backdrop-filter:blur(8px); flex-direction:column; gap:12px; }
+  .zoom-modal.open { display:flex; animation:fadeIn .25s ease; }
+  .zoom-modal img { max-width:90vw; max-height:78vh; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.5); animation:zoomIn .3s cubic-bezier(.34,1.56,.64,1); }
+  .zoom-modal .zoom-title { color:#fff; font-size:15px; font-weight:600; font-family:'Playfair Display',serif; letter-spacing:.02em; }
+  .zoom-modal .zoom-badge { font-size:11px; padding:3px 12px; border-radius:20px; font-weight:500; }
+  .zoom-close { position:fixed; top:18px; right:22px; color:#fff; font-size:28px; cursor:pointer; opacity:.8; font-family:'Inter',sans-serif; font-weight:300; z-index:1001; }
+  .zoom-close:hover { opacity:1; }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes zoomIn { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
+  .flip-enter { animation:cardIn .4s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes cardIn { from{opacity:0;transform:translateY(18px) scale(.95)} to{opacity:1;transform:translateY(0) scale(1)} }
+  @media(max-width:520px){ .container{grid-template-columns:repeat(2,1fr)} .refs-grid{grid-template-columns:1fr} .header h1{font-size:20px} }
+</style>
+
+<div id="app">
+
+  <!-- NAVIGATION -->
+  <div class="nav-bar">
+    <a class="nav-pill" href="index.html">
+      <span class="nav-dot"></span> Acumetría
+    </a>
+    <a class="nav-pill active" href="Audiometria.html">
+      <span class="nav-dot"></span> Audiometría
+    </a>
+  </div>
+
+  <div class="header">
+    <button class="toggle-btn" onclick="toggleDark()">
+      <div class="toggle-thumb" id="thumbIcon">☀️</div>
+    </button>
+    <div class="subtitle">Evaluación Audiológica Básica · Clemencia Restrepo Arias</div>
+    <h1>Tarjetas de Audiometría</h1>
+    <div class="badge">Presentado por Santiago Otero</div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-label">
+      <span id="progLabel">Bloque 1</span>
+      <span id="progCount">6 tarjetas</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:25%"></div></div>
+  </div>
+
+  <div class="container" id="cards"></div>
+
+  <div class="btns-row">
+    <button class="btn btn-outline" onclick="prevSet()">← Anterior</button>
+    <button class="btn btn-primary" onclick="nextSet()">Siguiente →</button>
+  </div>
+
+  <!-- GALERÍA -->
+  <div class="refs-section">
+    <div class="refs-label">Referencias visuales · Tipos de audiograma</div>
+    <div class="refs-grid">
+      <div class="ref-card ref-normal" onclick="openZoom('normal.png','Audiometría Normal','normal')">
+        <img src="normal.png" alt="Audiometría Normal">
+        <div class="ref-label">
+          Audiometría Normal
+          <br><span class="ref-badge">VA y VO en 0–25 dB · sin gap</span>
+        </div>
+      </div>
+      <div class="ref-card ref-conductiva" onclick="openZoom('conductiva.png','Audiometría Conductiva','conductiva')">
+        <img src="conductiva.png" alt="Audiometría Conductiva">
+        <div class="ref-label">
+          Audiometría Conductiva
+          <br><span class="ref-badge">Gap aéreo-óseo · VO normal</span>
+        </div>
+      </div>
+      <div class="ref-card ref-neuro" onclick="openZoom('neurosensioral.png','Audiometría Neurosensorial','neuro')">
+        <img src="neurosensioral.png" alt="Audiometría Neurosensorial">
+        <div class="ref-label">
+          Audiometría Neurosensorial
+          <br><span class="ref-badge">Sin gap · VA y VO elevadas juntas</span>
+        </div>
+      </div>
+      <div class="ref-card ref-mixta" onclick="openZoom('mixta.png','Audiometría Mixta','mixta')">
+        <img src="mixta.png" alt="Audiometría Mixta">
+        <div class="ref-label">
+          Audiometría Mixta
+          <br><span class="ref-badge">Gap + VO elevada · ambos componentes</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BACK LINK -->
+  <div class="page-link-section">
+    <a class="page-link-card" href="index.html">
+      <div class="plc-left">
+        <span class="plc-eyebrow">Módulo anterior</span>
+        <span class="plc-title">← Tarjetas de Acumetría</span>
+        <span class="plc-sub">Weber · Rinne · Schwabach · Evaluación con voz</span>
+      </div>
+      <span class="plc-arrow">⟵</span>
+    </a>
+  </div>
+
+</div>
+
+<div class="zoom-modal" id="zoomModal" onclick="closeZoom()">
+  <span class="zoom-close" onclick="closeZoom()">×</span>
+  <div class="zoom-title" id="zoomTitle"></div>
+  <img id="zoomImg" src="" alt="">
+  <div class="zoom-badge" id="zoomBadge"></div>
+</div>
+
+<script>
+const sections = {
+  "Conceptos": [
+    ["Estándar ASHA (2005): frecuencias VA","Conducción aérea en: 250, 500, 1000, 2000, 3000, 4000, 6000 y 8000 Hz (y 125 Hz en algunas circunstancias)."],
+    ["Estándar ASHA (2005): frecuencias VO","Conducción ósea en intervalos de octava de 250 Hz a 4000 Hz (y 3000 Hz si es necesario)."],
+    ["Signo OD sin enmascaramiento (VA)","Círculo rojo (O). Usado para registrar umbrales de vía aérea del oído derecho sin enmascaramiento."],
+    ["Signo OI sin enmascaramiento (VA)","X azul. Umbrales de vía aérea del oído izquierdo sin enmascaramiento."],
+    ["Signo OD con enmascaramiento (VA)","Triángulo rojo (Δ). Cuando se aplica enmascaramiento al evaluar la vía aérea del OD."],
+    ["Signo OI con enmascaramiento (VA)","Cuadrado azul (□). Cuando se aplica enmascaramiento al evaluar la vía aérea del OI."],
+    ["Signo VO sin enmascaramiento OD","< rojo. Conducción ósea del oído derecho sin enmascaramiento."],
+    ["Signo VO sin enmascaramiento OI","> azul. Conducción ósea del oído izquierdo sin enmascaramiento."],
+    ["Signo VO con enmascaramiento OD","[ rojo. Se enmascara el oído contralateral al evaluar VO del OD."],
+    ["Signo VO con enmascaramiento OI","] azul. Se enmascara el oído contralateral al evaluar VO del OI."],
+    ["VO inespecífica","Símbolo ^ (circunflejo). No se puede determinar a qué oído corresponde la respuesta ósea."],
+    ["Ausencia de umbral","Flecha hacia abajo. No se obtuvo respuesta a la máxima intensidad del equipo."],
+    ["PTA: definición","Promedio de Tonos Puros. Promedio de umbrales en 500, 1000 y 2000 Hz. Clasifica el grado de pérdida."],
+    ["Gap aéreo-óseo: interpretación","Diferencia VA − VO ≥ 10 dB indica componente conductivo. Sin gap → neurosensorial. Con gap + VO elevada → mixto."],
+    ["Clasificación Jerger: Normal","0–25 dB HL. Audición dentro de parámetros normales."],
+    ["Clasificación Jerger: Leve","26–40 dB. Dificultad con voz suave o susurrada."],
+    ["Clasificación Jerger: Moderada","41–55 dB. Dificultad para seguir conversación sin ayuda auditiva."],
+    ["Clasificación Jerger: Severa","56–90 dB. Solo comprende voz fuerte cerca al oído."],
+    ["Clasificación Jerger: Profunda","91+ dB. Poca o ninguna audición funcional sin amplificación."],
+    ["Clasificación Stach: Moderada a Severa","56–70 dB. Requiere amplificación en la mayoría de situaciones."],
+    ["Muesca en 4 kHz","Pérdida específica en 4000 Hz. Hallmark del trauma acústico por ruido."],
+    ["Muesca de Carhart","Muesca artificial en 2000 Hz en VO. Artefacto mecánico de la otoesclerosis, no pérdida neurosensorial real."],
+  ],
+  "Configuraciones": [
+    ["Audiograma descendente","Peor en agudos. Presbiacusia, trauma acústico, neuropatía auditiva."],
+    ["Audiograma ascendente","Peor en graves. Hidrops endolinfático (Menière), pérdida conductiva."],
+    ["Audiograma plano","Pérdida similar en todas las frecuencias. Conductiva o neurosensorial generalizada."],
+    ["Audiograma en cascada","Caída progresiva acentuada en medias-agudas. Neuropatía o mixta."],
+    ["Audiograma en cuchara","Peor en 1000–2000 Hz, mejor en graves y agudos. Menière."],
+    ["'Mordisco de galleta'","Pérdida en medias conservando graves y agudos. Alteraciones congénitas."],
+    ["Cuchara invertida","Peor en extremos, mejor en medias. Poco frecuente."],
+    ["Audiograma puntiagudo","Pérdida máxima en una frecuencia, mejor en adyacentes."],
+    ["Frecuencias agudas","Pérdida desde 2000–4000 Hz, graves conservados. Ruido."],
+    ["En esquina o rincón","Solo audición en graves a niveles altos. Pérdida severa-profunda."],
+    ["Audiometría Normal (imagen)","VA y VO entre 0–25 dB sin gap. Ambos oídos responden bien. Sin componente conductivo ni neurosensorial."],
+    ["Audiometría Conductiva (imagen)","VA elevada (~40–50 dB), VO normal (~0 dB). Gran gap aéreo-óseo. Problema en oído externo o medio."],
+    ["Audiometría Neurosensorial (imagen)","VA y VO elevadas juntas (~50–90 dB), sin gap. Problema en cóclea o nervio auditivo. Descendente."],
+    ["Audiometría Mixta (imagen)","VA muy elevada + VO también elevada + gap presente. Ambos componentes: conductivo y neurosensorial."],
+  ],
+  "Casos 1–5": [
+    ["Caso 1: patrón OD","VA del OD descendente: ~45 dB en graves. VO en límite normal. Gap presente → componente conductivo."],
+    ["Caso 1: patrón OI","VA del OI en 0–10 dB. VO también normal. OI con audición normal."],
+    ["Caso 1: diagnóstico","OD: hipoacusia conductiva leve-moderada. OI: normal. Posible otitis media, perforación o cerumen."],
+    ["Caso 2: patrón OD","VA del OD plana ~15 dB, VO superpuesta. Sin gap. Audición normal o pérdida mínima."],
+    ["Caso 2: patrón OI","VA del OI descendente desde ~50 dB a ~90 dB en 8kHz. VO similar, sin gap → neurosensorial."],
+    ["Caso 2: diagnóstico","OD: normal. OI: hipoacusia neurosensorial moderada a severa descendente. Presbiacusia unilateral o ruido."],
+    ["Caso 3: patrón OD","VA descendente ~45 dB en graves. VO en límite normal. Gap en graves → conductivo."],
+    ["Caso 3: patrón OI","VA ~50 dB descendente. VO ~45 dB con gap menor. Componente mixto en OI."],
+    ["Caso 3: diagnóstico","OD: conductiva leve. OI: mixta. Patología de oído medio bilateral."],
+    ["Caso 4: patrón OD","VA desciende de ~10 a ~100 dB. VO sigue VA con mínimo gap → neurosensorial descendente severa."],
+    ["Caso 4: patrón OI","Similar al OD, descendente, sin gap. Simétrica bilateral."],
+    ["Caso 4: diagnóstico","Neurosensorial bilateral simétrica descendente, moderada a severa. Presbiacusia avanzada o ruido crónico."],
+    ["Caso 5: patrón OD","VA ~65 dB plana, desciende a ~100 dB en agudos. VO similar → neurosensorial severa a profunda."],
+    ["Caso 5: patrón OI","VA ~40 dB en 250 Hz descendiendo a ~100 dB. Sin gap → neurosensorial moderada a severa."],
+    ["Caso 5: diagnóstico","OD: neurosensorial profunda. OI: neurosensorial severa descendente. Candidatos a audífonos o implante."],
+  ],
+  "Casos 6–10": [
+    ["Caso 6: acumetría","Weber lateraliza a OI. Rinne negativo bilateral. Schwabach alargado bilateral. Otoscopia alterada bilateral."],
+    ["Caso 6: diagnóstico","Hipoacusia conductiva bilateral mayor en OD. Otitis media u otoesclerosis bilateral."],
+    ["Caso 7: hallazgo clave","OD: agenesia de pabellón y conducto auditivo externo. OI: normal. No se puede realizar Rinne en OD."],
+    ["Caso 7: diagnóstico","OD: hipoacusia conductiva severa por atresia congénita. Manejo: BAHA o cirugía reconstructiva."],
+    ["Caso 8: contexto","Hombre 47 años. Acúfenos bilaterales. 15 años en industria metalmecánica sin protección auditiva."],
+    ["Caso 8: patrón esperado","Muesca en 4 kHz bilateral. Hipoacusia neurosensorial por ruido (NIHL). Schwabach acortado."],
+    ["Caso 9: contexto","Mujer 30 años. Hipoacusia progresiva bilateral desde primer embarazo. Diagnóstico: otoesclerosis avanzada."],
+    ["Caso 9: patrón esperado","Muesca de Carhart en 2 kHz en VO. Gap aéreo-óseo bilateral. Rinne negativo. Schwabach alargado."],
+    ["Caso 10: contexto","Mujer 86 años. Hipoacusia neurosensorial progresiva 15 años. Usa audífonos 8 años sin beneficio."],
+    ["Caso 10: patrón esperado","Neurosensorial bilateral severa-profunda descendente. Presbiacusia avanzada. Requiere reevaluación y readaptación."],
+    ["PTA: cómo calcularlo","(umbral 500 + 1000 + 2000 Hz) ÷ 3. Ejemplo: (40+50+60)/3 = 50 dB → hipoacusia moderada."],
+    ["Enmascaramiento en VA","Usar cuando VA del oído evaluado supera en ≥40 dB la VO del oído no evaluado."],
+    ["Enmascaramiento en VO","Siempre, excepto en pérdidas bilaterales simétricas o cuando se evalúa el oído al que lateralizó el Weber."],
+    ["Carhart vs. muesca en 4kHz","Carhart: artefacto en 2kHz VO → otoesclerosis. Muesca en 4kHz: real en VA → trauma acústico."],
+  ]
+};
+
+const sectionNames = Object.keys(sections);
+let currentSection = 0;
+let index = 0;
+const PER = 6;
+
+const badgeStyles = {
+  normal: {bg:'rgba(16,185,129,.18)',color:'#059669',text:'VA y VO 0–25 dB'},
+  conductiva: {bg:'rgba(239,68,68,.18)',color:'#dc2626',text:'Gap aéreo-óseo · VO normal'},
+  neuro: {bg:'rgba(99,102,241,.18)',color:'#4f46e5',text:'Sin gap · VA+VO elevadas'},
+  mixta: {bg:'rgba(245,158,11,.18)',color:'#d97706',text:'Gap + VO elevada'}
+};
+
+function currentData() { return sections[sectionNames[currentSection]]; }
+
+function renderTabs() {
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = '';
+  sectionNames.forEach((name, i) => {
+    const t = document.createElement('button');
+    t.className = 'tab' + (i === currentSection ? ' active' : '');
+    t.textContent = name;
+    t.onclick = () => { currentSection = i; index = 0; renderTabs(); render(true); };
+    tabs.appendChild(t);
+  });
+}
+
+function render(animate) {
+  const data = currentData();
+  const container = document.getElementById('cards');
+  container.innerHTML = '';
+  data.slice(index, index + PER).forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'card' + (animate ? ' flip-enter' : '');
+    card.style.animationDelay = (i * 0.06) + 's';
+    card.innerHTML = `<div class="inner">
+      <div class="face front">${item[0]}<span class="hint">Toca para ver</span></div>
+      <div class="face back"><span class="num">${index + i + 1}</span>${item[1]}</div>
+    </div>`;
+    card.onclick = () => card.classList.toggle('flip');
+    container.appendChild(card);
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  const data = currentData();
+  const total = Math.ceil(data.length / PER);
+  const blockNum = Math.floor(index / PER) + 1;
+  document.getElementById('progLabel').textContent = `Bloque ${blockNum} de ${total} · ${sectionNames[currentSection]}`;
+  document.getElementById('progCount').textContent = `${Math.min(PER, data.length - index)} tarjetas`;
+  document.getElementById('progFill').style.width = (blockNum / total * 100) + '%';
+}
+
+function nextSet() {
+  const data = currentData();
+  index = (index + PER) >= data.length ? 0 : index + PER;
+  render(true);
+}
+
+function prevSet() {
+  const data = currentData();
+  index = index - PER < 0 ? Math.floor((data.length - 1) / PER) * PER : index - PER;
+  render(true);
+}
+
+function toggleDark() {
+  document.body.classList.toggle('dark');
+  document.getElementById('thumbIcon').textContent = document.body.classList.contains('dark') ? '🌙' : '☀️';
+}
+
+function openZoom(src, title, type) {
+  event.stopPropagation();
+  const modal = document.getElementById('zoomModal');
+  document.getElementById('zoomImg').src = src;
+  document.getElementById('zoomTitle').textContent = title;
+  const b = document.getElementById('zoomBadge');
+  const s = badgeStyles[type];
+  b.textContent = s.text;
+  b.style.background = s.bg;
+  b.style.color = s.color;
+  modal.classList.add('open');
+}
+
+function closeZoom() { document.getElementById('zoomModal').classList.remove('open'); }
+
+renderTabs();
+render(false);
+</script>
