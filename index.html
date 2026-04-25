@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Acumetría</title>
+
+<style>
+body{
+    margin:0;
+    font-family: "Georgia", serif;
+    background:#f5f7fa;
+    color:#222;
+}
+
+h1{
+    text-align:center;
+    padding:20px;
+    font-weight:500;
+}
+
+.container{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:20px;
+    max-width:1000px;
+    margin:auto;
+    padding:20px;
+}
+
+.card{
+    height:240px;
+    perspective:1000px;
+    cursor:pointer;
+}
+
+.inner{
+    width:100%;
+    height:100%;
+    position:relative;
+    transform-style:preserve-3d;
+    transition:transform 0.6s;
+}
+
+.card.flip .inner{
+    transform:rotateY(180deg);
+}
+
+.face{
+    position:absolute;
+    width:100%;
+    height:100%;
+    border-radius:8px;
+    padding:15px;
+    backface-visibility:hidden;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+.front{
+    background:#ffffff;
+    border:1px solid #ccc;
+    font-weight:bold;
+}
+
+.back{
+    background:#e9eef3;
+    transform:rotateY(180deg);
+    font-size:14px;
+    line-height:1.4;
+}
+
+button{
+    display:block;
+    margin:20px auto;
+    padding:10px 25px;
+    border:1px solid #333;
+    background:white;
+    cursor:pointer;
+}
+
+/* NUEVO: estilo de la imagen */
+.img-container{
+    max-width:1000px;
+    margin:40px auto;
+    padding:20px;
+}
+
+.img-container img{
+    width:100%;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+}
+</style>
+</head>
+
+<body>
+
+<h1>TARJETAS DE MEMORIA ACUMETRIA</h1>
+
+<div class="container" id="cards"></div>
+
+<button onclick="nextSet()">Siguiente bloque</button>
+
+<!-- AQUÍ VA LA IMAGEN -->
+<div class="img-container">
+    <img src="acumetria.png" alt="Acumetría con diapasones">
+</div>
+
+<script>
+
+let data = [
+
+["Prueba de Weber: qué evalúa",
+"Evalúa la lateralización del sonido mediante conducción ósea en la línea media del cráneo. Permite identificar asimetrías entre ambos oídos."],
+
+["Weber: interpretación clínica",
+"Sin lateralización: audición normal o pérdida bilateral. Al oído enfermo: hipoacusia conductiva. Al oído sano: hipoacusia neurosensorial."],
+
+["Prueba de Rinne: fundamento",
+"Compara conducción aérea (CA) vs conducción ósea (CO). Se realiza mastoides → conducto auditivo."],
+
+["Rinne: interpretación",
+"CA > CO (positivo): normal o neurosensorial. CO > CA (negativo): conductiva."],
+
+["Prueba de Schwabach",
+"Compara duración de conducción ósea entre paciente y examinador."],
+
+["Schwabach: interpretación",
+"Normal: igual duración. Alargado: conductiva. Acortado: neurosensorial."],
+
+["Relación Weber + Rinne",
+"No deben interpretarse por separado. Su combinación define el tipo de hipoacusia."],
+
+["Patrón conductivo completo",
+"Rinne negativo + Weber al afectado + Schwabach alargado."],
+
+["Patrón neurosensorial completo",
+"Rinne positivo + Weber al sano + Schwabach acortado."],
+
+["Audición normal",
+"Weber central + Rinne positivo bilateral + Schwabach normal."],
+
+["Conductiva bilateral",
+"Weber central (simetría) + Rinne negativo bilateral + Schwabach alargado."],
+
+["Neurosensorial bilateral",
+"Weber central + Rinne positivo + Schwabach acortado."],
+
+["Evaluación con voz (dB)",
+"Susurrada (0–25 dB): normal. Conversacional (40–60 dB): moderada. Gritada (70–90 dB): severa. Sin respuesta (>90 dB): profunda."],
+
+["Importancia de la voz",
+"Permite estimar rápidamente el grado de pérdida auditiva antes de audiometría."],
+
+["Conductiva asimétrica",
+"Weber lateraliza al oído más afectado + Rinne negativo."],
+
+["Neurosensorial unilateral",
+"Weber lateraliza al oído sano + Rinne positivo + Schwabach acortado."],
+
+["Hipoacusia mixta",
+"Combina hallazgos conductivos y neurosensoriales. Rinne puede ser negativo con Schwabach acortado."],
+
+["Error común en Weber",
+"Confundir lateralización: conductiva va al oído enfermo, no al sano."],
+
+["Caso conductiva bilateral",
+"Voz moderada + Weber central + Rinne negativo bilateral + Schwabach alargado."],
+
+["Caso conductiva asimétrica",
+"Weber al más afectado + Rinne negativo bilateral."],
+
+["Caso combinado",
+"Un oído conductivo y otro neurosensorial. Weber se va al lado conductivo."],
+
+["Caso neurosensorial profunda",
+"No percibe voz + Weber central + Rinne positivo + Schwabach acortado."],
+
+["Caso neurosensorial unilateral",
+"Sin respuesta en oído afectado + Weber al sano."],
+
+["Conclusión clínica",
+"La acumetría orienta diagnóstico, pero debe confirmarse con audiometría."]
+
+];
+
+let index = 0;
+
+function render(){
+    let container = document.getElementById("cards");
+    container.innerHTML = "";
+
+    for(let i=index; i<index+6; i++){
+        let card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+        <div class="inner">
+            <div class="face front">${data[i][0]}</div>
+            <div class="face back">${data[i][1]}</div>
+        </div>
+        `;
+
+        card.onclick = function(){
+            card.classList.toggle("flip");
+        };
+
+        container.appendChild(card);
+    }
+}
+
+function nextSet(){
+    index += 6;
+    if(index >= data.length) index = 0;
+    render();
+}
+
+render();
+
+</script>
+
+</body>
+</html>
